@@ -8,6 +8,118 @@
     "overview": "Manage Your Adult Videos in Jellyfin/Emby",
     "versions": [
       {
+        "checksum": "1d8d152e3d38ac8050bd0fb9e8c2f724",
+        "changelog": "Auto Released by Actions",
+        "targetAbi": "10.9.0.0",
+        "sourceUrl": "https://github.com/Andrer757/Jellyfin.Plugin.PhoenixAdult/releases/download/v2025.822.1423.0/Jellyfin.plugin.PhoenixAdult@v2025.822.1423.0.zip",
+        "timestamp": "2025-08-22T14:23:46Z",
+        "version": "2025.822.1423.0"
+      },
+      {
+        "checksum": "6fe0631f60acdaa94224a162c5d3a305",
+        "changelog": "Auto Released by Actions",
+        "targetAbi": "10.9.0.0",
+        "sourceUrl": "https://github.com/Andrer757/Jellyfin.Plugin.PhoenixAdult/releases/download/v2025.822.1324.0/Jellyfin.plugin.PhoenixAdult@v2025.822.1324.0.zip",
+        "timestamp": "2025-08-22T13:25:20Z",
+        "version": "2025.822.1324.0"
+      },
+      {
+        "checksum": "91f71f98cc4d8a86de6e29690d70aa69",
+        "changelog": "Auto Released by Actions",
+        "targetAbi": "10.9.0.0",
+        "sourceUrl": "https://github.com/Andrer757/Jellyfin.Plugin.PhoenixAdult/releases/download/v2025.822.1023.0/Jellyfin.plugin.PhoenixAdult@v2025.822.1023.0.zip",
+        "timestamp": "2025-08-22T10:23:48Z",
+        "version": "2025.822.1023.0"
+      },
+      {
+        "checksum": "0b57f4ea42f68ea73a5014ea0afa7d43",
+        "changelog": "Auto Released by Actions",
+        "targetAbi": "10.9.0.0",
+        "sourceUrl": "https://github.com/Andrer757/Jellyfin.Plugin.PhoenixAdult/releases/download/v2025.821.1225.0/Jellyfin.plugin.PhoenixAdult@v2025.821.1225.0.zip",
+        "timestamp": "2025-08-21T12:25:46Z",
+        "version": "2025.821.1225.0"
+      },
+      {
+        "checksum": "d983996d01a3e564b9cba737cacec4fb",
+        "changelog": "Auto Released by Actions",
+        "targetAbi": "10.9.0.0",
+        "sourceUrl": "https://github.com/Andrer757/Jellyfin.Plugin.PhoenixAdult/releases/download/v2025.821.1042.0/Jellyfin.plugin.PhoenixAdult@v2025.821.1042.0.zip",
+        "timestamp": "2025-08-21T10:42:29Z",
+        "version": "2025.821.1042.0"
+      },
+      {
+        "checksum": "9ecc9a358ecab24c19413666e7d5d0b0",
+        "changelog": "Auto Released by Actions",
+        "targetAbi": "10.9.0.0",
+        "sourceUrl": "https://github.com/Andrer757/Jellyfin.Plugin.PhoenixAdult/releases/download/v2025.821.955.0/Jellyfin.plugin.PhoenixAdult@v2025.821.955.0.zip",
+        "timestamp": "2025-08-21T09:55:48Z",
+        "version": "2025.821.955.0"
+      },
+      {
+        "checksum": "ad4ef574b4d1f24834872ab4028e4cc0",
+        "changelog": "Auto Released by Actions",
+        "targetAbi": "10.9.0.0",
+        "sourceUrl": "https://github.com/Andrer757/Jellyfin.Plugin.PhoenixAdult/releases/download/v2025.821.819.0/Jellyfin.plugin.PhoenixAdult@v2025.821.819.0.zip",
+        "timestamp": "2025-08-21T08:20:13Z",
+        "version": "2025.821.819.0"
+      },
+      {
+        "checksum": "7bc42ee0137aef36a6e51bd655bb5809",
+        "changelog": "Auto Released by Actions",
+        "targetAbi": "10.9.0.0",
+        "sourceUrl": "https://github.com/Andrer757/Jellyfin.Plugin.PhoenixAdult/releases/download/v2025.820.1446.0/Jellyfin.plugin.PhoenixAdult@v2025.820.1446.0.zip",
+        "timestamp": "2025-08-20T14:46:51Z",
+        "version": "2025.820.1446.0"
+      },
+      {
+        "checksum": "f236e52905b0159164bf03045cd33346",
+        "changelog": "Auto Released by Actions",
+        "targetAbi": "10.9.0.0",
+        "sourceUrl": "https://github.com/Andrer757/Jellyfin.Plugin.PhoenixAdult/releases/download/v2025.819.2352.0/Jellyfin.plugin.PhoenixAdult@v2025.819.2352.0.zip",
+        "timestamp": "2025-08-19T23:53:01Z",
+        "version": "2025.819.2352.0"
+      },
+      {
+        "checksum": "544645d6aec8ec126d6f997edbb96077",
+        "changelog": "Auto Released by Actions",
+        "targetAbi": "10.9.0.0",
+        "sourceUrl": "https://github.com/Andrer757/Jellyfin.Plugin.PhoenixAdult/releases/download/v2025.819.2323.0/Jellyfin.plugin.PhoenixAdult@v2025.819.2323.0.zip",
+        "timestamp": "2025-08-19T23:24:10Z",
+        "version": "2025.819.2323.0"
+      },
+      {
+        "checksum": "0c3846c256c87057650edef3386db927",
+        "changelog": "Auto Released by Actions",
+        "targetAbi": "10.9.0.0",
+        "sourceUrl": "https://github.com/Andrer757/Jellyfin.Plugin.PhoenixAdult/releases/download/v2025.819.1352.0/Jellyfin.plugin.PhoenixAdult@v2025.819.1352.0.zip",
+        "timestamp": "2025-08-19T13:52:23Z",
+        "version": "2025.819.1352.0"
+      },
+      {
+        "checksum": "fa7d4c8f14ea123394eeeff60f58e474",
+        "changelog": "Auto Released by Actions",
+        "targetAbi": "10.9.0.0",
+        "sourceUrl": "https://github.com/Andrer757/Jellyfin.Plugin.PhoenixAdult/releases/download/v2025.819.1342.0/Jellyfin.plugin.PhoenixAdult@v2025.819.1342.0.zip",
+        "timestamp": "2025-08-19T13:42:35Z",
+        "version": "2025.819.1342.0"
+      },
+      {
+        "checksum": "0ec60cf35aba2905dc61a60e54df2aa2",
+        "changelog": "Auto Released by Actions",
+        "targetAbi": "10.9.0.0",
+        "sourceUrl": "https://github.com/Andrer757/Jellyfin.Plugin.PhoenixAdult/releases/download/v2025.819.1200.0/Jellyfin.plugin.PhoenixAdult@v2025.819.1200.0.zip",
+        "timestamp": "2025-08-19T12:01:14Z",
+        "version": "2025.819.1200.0"
+      },
+      {
+        "checksum": "cfff9631582de8db569522778efc8321",
+        "changelog": "Auto Released by Actions",
+        "targetAbi": "10.9.0.0",
+        "sourceUrl": "https://github.com/Andrer757/Jellyfin.Plugin.PhoenixAdult/releases/download/v2025.819.953.0/Jellyfin.plugin.PhoenixAdult@v2025.819.953.0.zip",
+        "timestamp": "2025-08-19T09:53:50Z",
+        "version": "2025.819.953.0"
+      },
+      {
         "checksum": "30e7639cea0b993185ec67947a71fb4b",
         "changelog": "Auto Released by Actions",
         "targetAbi": "10.9.0.0",

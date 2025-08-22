@@ -96,6 +96,10 @@ namespace PhoenixAdult.Sites
             };
 
             var http = await HTTP.Request(url, cancellationToken, headers).ConfigureAwait(false);
+            if (http.IsOK)
+            {
+                Logger.Info($"[Network1service] GetAPI content: {http.Content}");
+            }
             return http.IsOK ? JObject.Parse(http.Content) : null;
         }
 
@@ -135,6 +139,8 @@ namespace PhoenixAdult.Sites
                     url = $"{Helper.GetSearchSearchURL(siteNum)}/v2/releases?type={sceneType}&search={encodedSearchTitle}";
                 }
 
+                Logger.Info($"[Network1service] search url: {url}");
+
                 var searchResults = await GetDataFromAPI(url, instanceToken, cancellationToken).ConfigureAwait(false);
                 if (searchResults?["result"] == null)
                 {
@@ -169,6 +175,7 @@ namespace PhoenixAdult.Sites
 
         public async Task<MetadataResult<BaseItem>> Update(int[] siteNum, string[] sceneID, CancellationToken cancellationToken)
         {
+            Logger.Info($"[Network1service] Update called. siteNum: {(siteNum != null ? string.Join(",", siteNum) : "null")}, sceneID: {(sceneID != null ? string.Join(",", sceneID) : "null")}");
             var result = new MetadataResult<BaseItem>()
             {
                 Item = new Movie(),
@@ -176,6 +183,7 @@ namespace PhoenixAdult.Sites
             };
 
             string[] providerIds = sceneID[0].Split('|');
+            Logger.Info($"[Network1service] Update providerIds: {string.Join(" / ", providerIds)}");
             string curID = providerIds[0];
             string sceneType = providerIds[2];
 
@@ -265,9 +273,11 @@ namespace PhoenixAdult.Sites
 
         public async Task<IEnumerable<RemoteImageInfo>> GetImages(int[] siteNum, string[] sceneID, BaseItem item, CancellationToken cancellationToken)
         {
+            Logger.Info($"[Network1service] GetImages called. siteNum: {(siteNum != null ? string.Join(",", siteNum) : "null")}, sceneID: {(sceneID != null ? string.Join(",", sceneID) : "null")}");
             var images = new List<RemoteImageInfo>();
 
             string[] providerIds = sceneID[0].Split('|');
+            Logger.Info($"[Network1service] GetImages providerIds: {string.Join(" / ", providerIds)}");
             string curID = providerIds[0];
             string sceneType = providerIds[2];
 

@@ -31,6 +31,7 @@ namespace PhoenixAdult.Sites
             var httpResult = await HTTP.Request(url, HttpMethod.Get, cancellationToken);
             if (httpResult.IsOK)
             {
+                Logger.Info($"[NetworkGammaEntOther] GetApiKey called. httpResult.Content: {httpResult.Content}");
                 var match = Regex.Match(httpResult.Content, "\"apiKey\":\"([^\"]+)\"");
                 if (match.Success)
                 {
@@ -42,6 +43,7 @@ namespace PhoenixAdult.Sites
             httpResult = await HTTP.Request(url, HttpMethod.Get, cancellationToken);
             if (httpResult.IsOK)
             {
+                Logger.Info($"[NetworkGammaEntOther] GetApiKey called. httpResult.Content fallback: {httpResult.Content}");
                 var match = Regex.Match(httpResult.Content, "\"apiKey\":\"([^\"]+)\"");
                 if (match.Success)
                 {
@@ -65,16 +67,18 @@ namespace PhoenixAdult.Sites
                     new
                     {
                         indexName,
-                        @params = parameters
+                        @params = parameters,
                     },
                 },
             };
             var httpResult = await HTTP.Request(url, HttpMethod.Post, new StringContent(JsonConvert.SerializeObject(payload)), null, headers, cancellationToken);
+            Logger.Info($"[NetworkGammaEntOther] GetAlgolia called. httpResult.IsOK: {url} {new StringContent(JsonConvert.SerializeObject(payload))} {httpResult.IsOK} {httpResult.StatusCode} {httpResult.Content}");
             if (!httpResult.IsOK)
             {
                 return null;
             }
 
+            Logger.Info($"[NetworkGammaEntOther] results: {httpResult.Content}");
             var results = JObject.Parse(httpResult.Content)["results"];
             if (results is JArray resultsArray && resultsArray.Count > 0)
             {
@@ -92,12 +96,14 @@ namespace PhoenixAdult.Sites
                 sceneId = searchTitle.Split(' ').First();
                 searchTitle = searchTitle.Replace(sceneId, string.Empty).Trim();
             }
+            Logger.Info($"[NetworkGammaEntOther] Search called. Id and Title: {sceneId} : {searchTitle}");
 
             string apiKey = await GetApiKey(siteNum, cancellationToken);
             if (apiKey == null)
             {
                 return result;
             }
+            Logger.Info($"[NetworkGammaEntOther] Search called. apiKey: {apiKey}");
 
             foreach (var sceneType in new[] { "scenes", "movies" })
             {
