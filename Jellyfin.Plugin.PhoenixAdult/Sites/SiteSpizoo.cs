@@ -34,10 +34,46 @@ namespace PhoenixAdult.Sites
             var doc = new HtmlDocument();
             doc.LoadHtml(http.Content);
 
+            ParseSearchResults(doc, result);
+
+            var pager = doc.DocumentNode.SelectSingleNode(@"//ul[@class='pager']");
+            if (pager != null)
+            {
+                var pageUrls = new List<string>();
+                var pageNodes = pager.SelectNodes(@".//a");
+                if (pageNodes != null)
+                {
+                    foreach (var pageNode in pageNodes)
+                    {
+                        var pageUrl = pageNode.GetAttributeValue("href", string.Empty);
+                        if (!string.IsNullOrEmpty(pageUrl) && !pageUrls.Contains(pageUrl) && pageUrl != "#")
+                        {
+                            pageUrls.Add(pageUrl);
+                        }
+                    }
+                }
+
+                foreach (var pageUrl in pageUrls)
+                {
+                    var nextPageHttp = await HTTP.Request($"{Helper.GetSearchBaseURL(siteNum)}/{pageUrl}", cancellationToken);
+                    if (nextPageHttp.IsOK)
+                    {
+                        var nextPageDoc = new HtmlDocument();
+                        nextPageDoc.LoadHtml(nextPageHttp.Content);
+                        ParseSearchResults(nextPageDoc, result);
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private void ParseSearchResults(HtmlDocument doc, List<RemoteSearchResult> result)
+        {
             var searchResults = doc.DocumentNode.SelectNodes(@"//div[@class='model-update row']");
             if (searchResults == null)
             {
-                return result;
+                return;
             }
 
             foreach (var searchResult in searchResults)
