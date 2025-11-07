@@ -8,6 +8,46 @@
     "overview": "Manage Your Adult Videos in Jellyfin/Emby",
     "versions": [
       {
+        "checksum": "0f06c6b1197a21a703b0fdd2fe23e136",
+        "changelog": "Auto Released by Actions",
+        "targetAbi": "10.9.0.0",
+        "sourceUrl": "https://github.com/Andrer757/Jellyfin.Plugin.PhoenixAdult/releases/download/v2025.1107.2216.0/Jellyfin.plugin.PhoenixAdult@v2025.1107.2216.0.zip",
+        "timestamp": "2025-11-07T22:17:13Z",
+        "version": "2025.1107.2216.0"
+      },
+      {
+        "checksum": "72d8a16796f07367ae6f8415f83e1b3a",
+        "changelog": "Auto Released by Actions",
+        "targetAbi": "10.9.0.0",
+        "sourceUrl": "https://github.com/Andrer757/Jellyfin.Plugin.PhoenixAdult/releases/download/v2025.1107.2202.0/Jellyfin.plugin.PhoenixAdult@v2025.1107.2202.0.zip",
+        "timestamp": "2025-11-07T22:02:57Z",
+        "version": "2025.1107.2202.0"
+      },
+      {
+        "checksum": "20db1303729a962786c1d0a7e646556f",
+        "changelog": "Auto Released by Actions",
+        "targetAbi": "10.9.0.0",
+        "sourceUrl": "https://github.com/Andrer757/Jellyfin.Plugin.PhoenixAdult/releases/download/v2025.1107.1643.0/Jellyfin.plugin.PhoenixAdult@v2025.1107.1643.0.zip",
+        "timestamp": "2025-11-07T16:44:29Z",
+        "version": "2025.1107.1643.0"
+      },
+      {
+        "checksum": "b39b3bacc00d4015397333c63142364a",
+        "changelog": "Auto Released by Actions",
+        "targetAbi": "10.9.0.0",
+        "sourceUrl": "https://github.com/Andrer757/Jellyfin.Plugin.PhoenixAdult/releases/download/v2025.1107.1549.0/Jellyfin.plugin.PhoenixAdult@v2025.1107.1549.0.zip",
+        "timestamp": "2025-11-07T15:50:43Z",
+        "version": "2025.1107.1549.0"
+      },
+      {
+        "checksum": "15566e62450a2bdca6631b6e6812d50f",
+        "changelog": "Auto Released by Actions",
+        "targetAbi": "10.9.0.0",
+        "sourceUrl": "https://github.com/Andrer757/Jellyfin.Plugin.PhoenixAdult/releases/download/v2025.1107.1532.0/Jellyfin.plugin.PhoenixAdult@v2025.1107.1532.0.zip",
+        "timestamp": "2025-11-07T15:33:32Z",
+        "version": "2025.1107.1532.0"
+      },
+      {
         "checksum": "052b30ee109b49556a11cbdbb97ddfb5",
         "changelog": "Auto Released by Actions",
         "targetAbi": "10.9.0.0",

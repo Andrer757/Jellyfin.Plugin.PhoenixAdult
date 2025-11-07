@@ -161,7 +161,7 @@ namespace PhoenixAdult.Sites
             }
 
             HtmlNodeCollection actorNodes;
-            if (siteNum[1] == 0 || (siteNum[1] >= 2 && siteNum[1] < 7) || siteNum[1] == 10 || siteNum[1] == 12 || siteNum[1] == 14)
+            if (siteNum[1] == 0 || (siteNum[1] >= 2 && siteNum[1] < 7) || siteNum[1] == 10 || siteNum[1] == 14)
             {
                 actorNodes = doc.DocumentNode.SelectNodes(@"//h3[text()='Pornstars:']/following-sibling::a");
             }
@@ -169,9 +169,9 @@ namespace PhoenixAdult.Sites
             {
                 actorNodes = doc.DocumentNode.SelectNodes(@"//h3[text()='playmates:']/following-sibling::a");
             }
-            else if (siteNum[1] == 1)
+            else if (siteNum[1] == 1 || siteNum[1] == 12)
             {
-                actorNodes = doc.DocumentNode.SelectNodes(@"//a[@class='model-name']");
+                actorNodes = doc.DocumentNode.SelectNodes(@"//h2[text()='Pornstars:']/following-sibling::span[1]//a");
             }
             else
             {
@@ -204,31 +204,67 @@ namespace PhoenixAdult.Sites
 
         public async Task<IEnumerable<RemoteImageInfo>> GetImages(int[] siteNum, string[] sceneID, BaseItem item, CancellationToken cancellationToken)
         {
-            // Simplified image logic, may need adjustments
-            var images = new List<RemoteImageInfo>();
+            var result = new List<RemoteImageInfo>();
             var sceneURL = Helper.Decode(sceneID[0]);
             var http = await HTTP.Request(sceneURL, cancellationToken);
-            if (http.IsOK)
+            if (!http.IsOK)
             {
-                var doc = new HtmlDocument();
-                doc.LoadHtml(http.Content);
-                var imageNodes = doc.DocumentNode.SelectNodes("//img/@src");
-                if (imageNodes != null)
-                {
-                    foreach (var img in imageNodes)
-                    {
-                        var imgUrl = img.GetAttributeValue("src", string.Empty);
-                        if (!imgUrl.StartsWith("http"))
-                        {
-                            imgUrl = new Uri(new Uri(Helper.GetSearchBaseURL(siteNum)), imgUrl).ToString();
-                        }
+                return result;
+            }
 
-                        images.Add(new RemoteImageInfo { Url = imgUrl });
+            var doc = new HtmlDocument();
+            doc.LoadHtml(http.Content);
+
+            HtmlNode posterNode;
+            if (siteNum[1] == 1 || siteNum[1] == 12)
+            {
+                posterNode = doc.DocumentNode.SelectSingleNode(@"//video[@id='video']");
+            }
+            else
+            {
+                posterNode = doc.DocumentNode.SelectSingleNode(@"//video[@id='the-video']");
+            }
+
+            if (posterNode != null)
+            {
+                var posterUrl = posterNode.GetAttributeValue("poster", string.Empty);
+                if (!string.IsNullOrEmpty(posterUrl))
+                {
+                    result.Add(new RemoteImageInfo
+                    {
+                        Url = posterUrl,
+                        Type = ImageType.Primary,
+                    });
+                }
+            }
+
+            HtmlNodeCollection backdropNodes;
+            if (siteNum[1] == 1 || siteNum[1] == 12)
+            {
+                backdropNodes = doc.DocumentNode.SelectNodes(@"//section[@id='trailer-photos']//img");
+            }
+            else
+            {
+                backdropNodes = doc.DocumentNode.SelectNodes(@"//section[@id='photos-tour']//img");
+            }
+
+            if (backdropNodes != null)
+            {
+                foreach (var backdropNode in backdropNodes)
+                {
+                    var backdropUrl = backdropNode.GetAttributeValue("src", string.Empty);
+                    if (!string.IsNullOrEmpty(backdropUrl))
+                    {
+                        result.Add(new RemoteImageInfo
+                        {
+                            Url = backdropUrl,
+                            Type = ImageType.Backdrop,
+                        });
                     }
                 }
             }
 
-            return images;
+            return result;
         }
     }
 }
