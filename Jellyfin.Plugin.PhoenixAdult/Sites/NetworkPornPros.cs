@@ -49,6 +49,7 @@ namespace PhoenixAdult.Sites
             string url = $"{searchSite}/{searchType}/{slug}";
 
             var req = await HTTP.Request(url, cancellationToken, headers: headers);
+
             if (!req.IsOK)
             {
                 string subSite = Helper.GetSearchSiteName(siteNum).Replace(" ", string.Empty).ToLower();

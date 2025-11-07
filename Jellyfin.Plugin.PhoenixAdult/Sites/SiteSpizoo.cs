@@ -34,7 +34,7 @@ namespace PhoenixAdult.Sites
             var doc = new HtmlDocument();
             doc.LoadHtml(http.Content);
 
-            ParseSearchResults(doc, result);
+            this.ParseSearchResults(siteNum, doc, result);
 
             var pager = doc.DocumentNode.SelectSingleNode(@"//ul[@class='pager']");
             if (pager != null)
@@ -60,7 +60,7 @@ namespace PhoenixAdult.Sites
                     {
                         var nextPageDoc = new HtmlDocument();
                         nextPageDoc.LoadHtml(nextPageHttp.Content);
-                        ParseSearchResults(nextPageDoc, result);
+                        this.ParseSearchResults(siteNum, nextPageDoc, result);
                     }
                 }
             }
@@ -68,9 +68,18 @@ namespace PhoenixAdult.Sites
             return result;
         }
 
-        private void ParseSearchResults(HtmlDocument doc, List<RemoteSearchResult> result)
+        private void ParseSearchResults(int[] siteNum, HtmlDocument doc, List<RemoteSearchResult> result)
         {
-            var searchResults = doc.DocumentNode.SelectNodes(@"//div[@class='model-update row']");
+            HtmlNodeCollection searchResults;
+            if (siteNum[1] == 1 || siteNum[1] == 12 || siteNum[1] == 13 || siteNum[1] == 14)
+            {
+                searchResults = doc.DocumentNode.SelectNodes(@"//div[@class='result-content row']");
+            }
+            else
+            {
+                searchResults = doc.DocumentNode.SelectNodes(@"//div[@class='model-update row']");
+            }
+
             if (searchResults == null)
             {
                 return;
@@ -78,7 +87,20 @@ namespace PhoenixAdult.Sites
 
             foreach (var searchResult in searchResults)
             {
-                var titleNode = searchResult.SelectSingleNode(@".//h3[@class='titular']");
+                HtmlNode titleNode;
+                if (siteNum[1] == 7 || siteNum[1] == 10)
+                {
+                    titleNode = searchResult.SelectSingleNode(@".//h3[@class='title-video']");
+                }
+                else if (siteNum[1] == 1 || siteNum[1] == 12 || siteNum[1] == 13 || siteNum[1] == 14)
+                {
+                    titleNode = searchResult.SelectSingleNode(@".//h3[@class='title']");
+                }
+                else
+                {
+                    titleNode = searchResult.SelectSingleNode(@".//h3[@class='titular']");
+                }
+
                 var title = titleNode?.InnerText.Trim();
 
                 var urlNode = searchResult.SelectSingleNode(@".//a");
@@ -93,7 +115,7 @@ namespace PhoenixAdult.Sites
                 var date = string.Empty;
                 if (dateNode != null)
                 {
-                    var dateText = dateNode.InnerText.Replace("Released date:", "").Trim();
+                    var dateText = dateNode.InnerText.Replace("Released date:", string.Empty).Trim();
                     if (DateTime.TryParse(dateText, out var parsedDate))
                     {
                         date = parsedDate.ToString("yyyy-MM-dd");
@@ -107,8 +129,6 @@ namespace PhoenixAdult.Sites
                     SearchProviderName = Plugin.Instance.Name,
                 });
             }
-
-            return result;
         }
 
         public async Task<MetadataResult<BaseItem>> Update(int[] siteNum, string[] sceneID, CancellationToken cancellationToken)
@@ -140,7 +160,45 @@ namespace PhoenixAdult.Sites
                 movie.ProductionYear = parsedDate.Year;
             }
 
-            // Actor and Genre logic needs to be manually added for each site
+            HtmlNodeCollection actorNodes;
+            if (siteNum[1] == 0 || (siteNum[1] >= 2 && siteNum[1] < 7) || siteNum[1] == 10 || siteNum[1] == 12 || siteNum[1] == 14)
+            {
+                actorNodes = doc.DocumentNode.SelectNodes(@"//h3[text()='Pornstars:']/following-sibling::a");
+            }
+            else if (siteNum[1] == 7)
+            {
+                actorNodes = doc.DocumentNode.SelectNodes(@"//h3[text()='playmates:']/following-sibling::a");
+            }
+            else if (siteNum[1] == 1)
+            {
+                actorNodes = doc.DocumentNode.SelectNodes(@"//a[@class='model-name']");
+            }
+            else
+            {
+                actorNodes = doc.DocumentNode.SelectNodes(@"//h3[text()='Girls:']/following-sibling::a");
+            }
+
+            if (actorNodes != null)
+            {
+                foreach (var actorNode in actorNodes)
+                {
+                    result.AddPerson(new PersonInfo
+                    {
+                        Name = actorNode.InnerText.Trim().Replace(".", string.Empty),
+                        Type = PersonKind.Actor,
+                    });
+                }
+            }
+
+            var genreNodes = doc.DocumentNode.SelectNodes(@"//div[@class='categories-holder']/a");
+            if (genreNodes != null)
+            {
+                foreach (var genreNode in genreNodes)
+                {
+                    movie.AddGenre(genreNode.GetAttributeValue("title", string.Empty).Trim());
+                }
+            }
+
             return result;
         }
 
