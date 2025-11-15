@@ -30,7 +30,7 @@ namespace PhoenixAdult.Sites
         private static readonly string findVideoQuery = "query FindVideo($videoId: ID!) { video { find(input: {videoId: $videoId}) { result { videoId title duration galleryCount description { short long } talent { type talent { talentId name } } } } } }";
         private static readonly string assetQuery = "query BatchFindAssetQuery($paths: [String!]!) { asset { batch(input: {paths: $paths}) { result { path mime size serve { type uri } } } } }";
 
-        private static readonly Dictionary<string, List<string>> apiKeyDB = new Dictionary<string, List<string>>
+        private static readonly Dictionary<string, List<string>> apiKeyDB = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase)
         {
             { "fit18", new List<string> { "77cd9282-9d81-4ba8-8868-ca9125c76991" } },
             { "thicc18", new List<string> { "0e36c7e9-8cb7-4fa1-9454-adbc2bad15f0" } },
@@ -64,8 +64,18 @@ namespace PhoenixAdult.Sites
                 { "Referer", searchUrl },
             };
 
-            var http = await HTTP.Request(searchUrl, HttpMethod.Get, param, cancellationToken, headers).ConfigureAwait(false);
-            return http.IsOK ? JObject.Parse(http.Content) : null;
+            Logger.Info($"[Network18] GetDataFromAPI Request Body: {paramsJson}");
+            var http = await HTTP.Request(searchUrl, HttpMethod.Post, param, cancellationToken, headers).ConfigureAwait(false);
+            if (http.IsOK)
+            {
+                Logger.Info($"[Network18] GetDataFromAPI Response: {http.Content}");
+                return JObject.Parse(http.Content);
+            }
+            else
+            {
+                Logger.Error($"[Network18] GetDataFromAPI failed. Status code: {http.StatusCode}");
+                return null;
+            }
         }
 
         public async Task<List<RemoteSearchResult>> Search(int[] siteNum, string searchTitle, DateTime? searchDate, CancellationToken cancellationToken)
@@ -76,13 +86,16 @@ namespace PhoenixAdult.Sites
                 return result;
             }
 
+            Logger.Info($"[Network18] Searching for title: '{searchTitle}'");
             var searchResults = await GetDataFromAPI(searchQuery, "query", searchTitle, siteNum, cancellationToken);
             var resultToken = searchResults?.SelectToken("data.search.search.result");
             if (resultToken == null || resultToken.Type == JTokenType.Null)
             {
+                Logger.Info("[Network18] No search results found.");
                 return result;
             }
 
+            Logger.Info($"[Network18] Found {resultToken.Count()} search results.");
             foreach (var searchResult in resultToken)
             {
                 if (searchResult["type"].ToString() == "VIDEO")
@@ -165,7 +178,7 @@ namespace PhoenixAdult.Sites
 
                 var actorPhotoPaths = new List<string> { $"/members/models/{actorTalentId}/profile-sm.jpg" };
                 var actorPhotoData = await GetDataFromAPI(assetQuery, "paths", actorPhotoPaths, siteNum, cancellationToken);
-                string actorPhotoURL = actorPhotoData?.SelectToken("data.asset.batch.result[0].serve.uri")?.ToString() ?? string.Empty;
+                string actorPhotoURL = (string)actorPhotoData?.SelectToken("data.asset.batch.result[0].serve.uri") ?? string.Empty;
 
                 result.People.Add(new PersonInfo { Name = actorName, Type = PersonKind.Actor, ImageUrl = actorPhotoURL });
             }
