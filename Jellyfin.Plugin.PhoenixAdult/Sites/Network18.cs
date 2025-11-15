@@ -165,7 +165,7 @@ namespace PhoenixAdult.Sites
 
                 var actorPhotoPaths = new List<string> { $"/members/models/{actorTalentId}/profile-sm.jpg" };
                 var actorPhotoData = await GetDataFromAPI(assetQuery, "paths", actorPhotoPaths, siteNum, cancellationToken);
-                string actorPhotoURL = actorPhotoData?.SelectToken("data.asset.batch.result[0].serve.uri")?.ToString() ?? string.Empty;
+                string actorPhotoURL = (string)actorPhotoData?.SelectToken("data.asset.batch.result[0].serve.uri") ?? string.Empty;
 
                 result.People.Add(new PersonInfo { Name = actorName, Type = PersonKind.Actor, ImageUrl = actorPhotoURL });
             }

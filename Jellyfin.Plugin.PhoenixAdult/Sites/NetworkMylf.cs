@@ -98,7 +98,7 @@ namespace PhoenixAdult.Sites
                     string curID = ((JProperty)sceneData.First).Name;
                     var details = (JObject)sceneData[curID];
                     string titleNoFormatting = Helper.ParseTitle((string)details["title"], siteNum);
-                    string subSite = details.SelectToken("site.name")?.ToString() ?? Helper.GetSearchSiteName(siteNum);
+                    string subSite = (string)details.SelectToken("site.name") ?? Helper.GetSearchSiteName(siteNum);
 
                     string releaseDateStr = string.Empty;
                     if (details["publishedDate"] != null && DateTime.TryParse((string)details["publishedDate"], out var releaseDate))
@@ -148,7 +148,7 @@ namespace PhoenixAdult.Sites
             movie.Overview = HTML.StripHtml((string)details["description"]);
             movie.AddStudio("MYLF");
 
-            string subSite = details.SelectToken("site.name")?.ToString() ?? Helper.GetSearchSiteName(siteNum);
+            string subSite = (string)details.SelectToken("site.name") ?? Helper.GetSearchSiteName(siteNum);
             movie.AddTag(subSite);
 
             if (DateTime.TryParse(sceneDate, out var releaseDate))
