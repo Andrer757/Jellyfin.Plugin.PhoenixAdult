@@ -85,8 +85,8 @@ namespace PhoenixAdult.Sites
                 return result;
             }
 
-            string titleNoFormatting = Helper.ParseTitle(searchResult["title"]?.ToString() ?? string.Empty, siteNum);
-            string subSite = searchResult["sponsor"]?["name"]?.ToString() ?? string.Empty;
+            string titleNoFormatting = Helper.ParseTitle((string)searchResult["title"] ?? string.Empty, siteNum);
+            string subSite = (string)searchResult.SelectToken("sponsor.name") ?? string.Empty;
             string curID = Helper.Encode(slug);
 
             string releaseDate = string.Empty;
@@ -125,9 +125,9 @@ namespace PhoenixAdult.Sites
 
             var movie = (Movie)result.Item;
 
-            movie.Name = Helper.ParseTitle(detailsPageElements["title"]?.ToString() ?? string.Empty, siteNum);
+            movie.Name = Helper.ParseTitle((string)detailsPageElements["title"] ?? string.Empty, siteNum);
 
-            string summary = detailsPageElements["description"]?.ToString().Trim();
+            string summary = ((string)detailsPageElements["description"])?.Trim();
             if (!string.IsNullOrEmpty(summary) && !summary.Equals("n/a", StringComparison.OrdinalIgnoreCase))
             {
                 movie.Overview = summary;
@@ -135,7 +135,7 @@ namespace PhoenixAdult.Sites
 
             movie.AddStudio("PornPros");
 
-            string tagline = detailsPageElements["sponsor"]?["name"]?.ToString() ?? string.Empty;
+            string tagline = (string)detailsPageElements.SelectToken("sponsor.name") ?? string.Empty;
             movie.AddTag(tagline);
             movie.AddCollection(tagline);
 

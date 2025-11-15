@@ -266,7 +266,7 @@ namespace PhoenixAdult.Sites
                         continue;
                     }
 
-                    string actorPhotoUrl = actorDetails.SelectToken("images.profile.0.xs.url")?.ToString() ?? string.Empty;
+                    string actorPhotoUrl = (string)actorDetails.SelectToken("images.profile.0.xs.url") ?? string.Empty;
                     result.People.Add(new PersonInfo { Name = actorDetails["name"].ToString(), Type = PersonKind.Actor, ImageUrl = actorPhotoUrl });
                 }
             }

@@ -100,8 +100,8 @@ namespace PhoenixAdult.Sites
                         var content = detailsPageElements[sceneType].First as JProperty;
                         var details = content.Value;
                         string curId = content.Name;
-                        string titleNoFormatting = details["title"].ToString();
-                        string subSite = details.SelectToken("site.name")?.ToString() ?? Helper.GetSearchSiteName(siteNum);
+                        string titleNoFormatting = (string)details["title"];
+                        string subSite = (string)details.SelectToken("site.name") ?? Helper.GetSearchSiteName(siteNum);
                         string releaseDate = string.Empty;
                         if (details["publishedDate"] != null && DateTime.TryParse(details["publishedDate"].ToString(), out var parsedDate))
                         {
@@ -142,11 +142,11 @@ namespace PhoenixAdult.Sites
             }
 
             var movie = (Movie)result.Item;
-            movie.Name = detailsPageElements["title"].ToString();
-            movie.Overview = detailsPageElements["description"].ToString();
+            movie.Name = (string)detailsPageElements["title"];
+            movie.Overview = (string)detailsPageElements["description"];
             movie.AddStudio("TeamSkeet");
 
-            string tagline = detailsPageElements.SelectToken("site.name")?.ToString() ?? Helper.GetSearchSiteName(siteNum);
+            string tagline = (string)detailsPageElements.SelectToken("site.name") ?? Helper.GetSearchSiteName(siteNum);
             movie.AddTag(tagline);
 
             if (!string.IsNullOrEmpty(sceneDate) && DateTime.TryParse(sceneDate, out var parsedDate))
@@ -173,8 +173,8 @@ namespace PhoenixAdult.Sites
 
             foreach (var actor in detailsPageElements["models"])
             {
-                string actorId = actor["modelId"]?.ToString() ?? actor["id"]?.ToString();
-                string actorName = actor["modelName"]?.ToString() ?? actor["name"]?.ToString();
+                string actorId = (string)actor["modelId"] ?? (string)actor["id"];
+                string actorName = (string)actor["modelName"] ?? (string)actor["name"];
                 string actorPhotoUrl = string.Empty;
                 var actorData = await GetJsonFromPage($"{Helper.GetSearchBaseURL(siteNum)}/models/{actorId}", cancellationToken);
                 if (actorData != null)
