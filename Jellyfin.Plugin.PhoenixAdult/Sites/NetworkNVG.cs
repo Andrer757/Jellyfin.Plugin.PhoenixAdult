@@ -90,8 +90,8 @@ namespace PhoenixAdult.Sites
                         if (videoIdMatch.Success)
                         {
                             var pageData = await GetPageData(siteNum, int.Parse(videoIdMatch.Value), cancellationToken);
-                            string titleNoFormatting = pageData?.SelectToken("updates.short_title")?.ToString() ?? detailsPageElements.SelectSingleNode("//h2")?.InnerText;
-                            string curId = pageData?.SelectToken("updates.mysqlId")?.ToString() ?? videoIdMatch.Value;
+                            string titleNoFormatting = (string)pageData?.SelectToken("updates.short_title") ?? detailsPageElements.SelectSingleNode("//h2")?.InnerText;
+                            string curId = (string)pageData?.SelectToken("updates.mysqlId") ?? videoIdMatch.Value;
                             string releaseDate = string.Empty;
                             if (pageData != null && DateTime.TryParse(pageData["updates"]["release_date"].ToString(), out var parsedDate))
                             {

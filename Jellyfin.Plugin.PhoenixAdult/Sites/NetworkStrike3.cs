@@ -227,14 +227,14 @@ namespace PhoenixAdult.Sites
             var movieImages = video.SelectToken("images.movie");
             if (movieImages != null && movieImages.Any())
             {
-                posterUrl = movieImages.Last.SelectToken("highdpi.3x")?.ToString() ?? movieImages.Last.SelectToken("src")?.ToString();
+                posterUrl = (string)movieImages.Last.SelectToken("highdpi.3x") ?? (string)movieImages.Last.SelectToken("src");
             }
             else
             {
                 var posterImages = video.SelectToken("images.poster");
                 if (posterImages != null && posterImages.Any())
                 {
-                    posterUrl = posterImages.Last.SelectToken("highdpi.3x")?.ToString() ?? posterImages.Last.SelectToken("src")?.ToString();
+                    posterUrl = (string)posterImages.Last.SelectToken("highdpi.3x") ?? (string)posterImages.Last.SelectToken("src");
                 }
             }
 
