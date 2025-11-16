@@ -162,9 +162,9 @@ namespace PhoenixAdult.Sites
             }
 
             var movie = (Movie)result.Item;
-            movie.Name = GetCleanTitle(detailsPageElements["title"]?.ToString());
+            movie.Name = GetCleanTitle((string)detailsPageElements["title"]);
 
-            string summary = HTML.StripHtml(detailsPageElements["description"]?.ToString() ?? string.Empty);
+            string summary = HTML.StripHtml((string)detailsPageElements["description"] ?? string.Empty);
             summary = summary.Split(new[] { "--SCREEN SIZE", "--SREEN SIZE" }, StringSplitOptions.None)[0].Trim();
             summary = summary.Split(new[] { "window.NREUM" }, StringSplitOptions.None)[0].Replace("**TOP 50 CLIP**", string.Empty).Replace("1920x1080 (HD1080)", string.Empty).Trim();
             movie.Overview = summary;

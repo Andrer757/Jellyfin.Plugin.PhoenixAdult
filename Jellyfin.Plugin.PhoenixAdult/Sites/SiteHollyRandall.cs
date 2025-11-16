@@ -41,8 +41,8 @@ namespace PhoenixAdult.Sites
             {
                 foreach (var node in searchNodes)
                 {
-                    var titleNode = node.SelectSingleNode("./div[@class='item-thumb']/a");
-                    string titleNoFormatting = titleNode?.GetAttributeValue("title", string.Empty);
+                    var titleNode = node.SelectSingleNode(".//h4[@class='link_bright']/a");
+                    string titleNoFormatting = titleNode?.InnerText.Trim();
                     string sceneUrl = titleNode?.GetAttributeValue("href", string.Empty);
                     if (sceneUrl?.StartsWith(JoinStr) == false)
                     {
@@ -59,6 +59,7 @@ namespace PhoenixAdult.Sites
                             ProviderIds = { { Plugin.Instance.Name, $"{curId}|{Helper.Encode(titleNoFormatting)}|{releaseDate}" } },
                             Name = $"{titleNoFormatting} {releaseDate} [{Helper.GetSearchSiteName(siteNum)}]",
                             SearchProviderName = Plugin.Instance.Name,
+                            ImageUrl = titleNode.SelectSingleNode("./img")?.GetAttributeValue("src", string.Empty)
                         });
                     }
                 }
