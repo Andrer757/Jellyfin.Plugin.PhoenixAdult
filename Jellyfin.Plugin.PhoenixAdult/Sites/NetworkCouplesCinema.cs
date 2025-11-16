@@ -23,6 +23,8 @@ namespace PhoenixAdult.Sites
 {
     public class NetworkCouplesCinema : IProviderBase
     {
+        private readonly Dictionary<string, string> _cookies = new Dictionary<string, string> { { "cookiesAccepted", "true" } };
+
         public async Task<List<RemoteSearchResult>> Search(int[] siteNum, string searchTitle, DateTime? searchDate, CancellationToken cancellationToken)
         {
             var result = new List<RemoteSearchResult>();
@@ -36,7 +38,7 @@ namespace PhoenixAdult.Sites
             if (sceneId != null)
             {
                 string sceneUrl = $"{Helper.GetSearchBaseURL(siteNum)}/post/details/{sceneId}";
-                var httpResult = await HTTP.Request(sceneUrl, HttpMethod.Get, cancellationToken);
+                var httpResult = await HTTP.Request(sceneUrl, HttpMethod.Get, cancellationToken, cookies: _cookies);
                 if (httpResult.IsOK)
                 {
                     var detailsPageElements = HTML.ElementFromString(httpResult.Content);
@@ -54,7 +56,7 @@ namespace PhoenixAdult.Sites
             else
             {
                 string searchUrl = Helper.GetSearchSearchURL(siteNum) + searchTitle.Replace(" ", "+");
-                var httpResult = await HTTP.Request(searchUrl, HttpMethod.Get, cancellationToken);
+                var httpResult = await HTTP.Request(searchUrl, HttpMethod.Get, cancellationToken, cookies: _cookies);
                 if (httpResult.IsOK)
                 {
                     var searchPageElements = HTML.ElementFromString(httpResult.Content);
@@ -101,7 +103,7 @@ namespace PhoenixAdult.Sites
 
             string searchDate = providerIds.Length > 1 ? providerIds[1] : string.Empty;
 
-            var httpResult = await HTTP.Request(sceneUrl, HttpMethod.Get, cancellationToken);
+            var httpResult = await HTTP.Request(sceneUrl, HttpMethod.Get, cancellationToken, cookies: _cookies);
             if (!httpResult.IsOK)
             {
                 return result;
@@ -161,7 +163,7 @@ namespace PhoenixAdult.Sites
                 images.Add(new RemoteImageInfo { Url = sceneCover });
             }
 
-            var httpResult = await HTTP.Request(sceneUrl, HttpMethod.Get, cancellationToken);
+            var httpResult = await HTTP.Request(sceneUrl, HttpMethod.Get, cancellationToken, cookies: _cookies);
             if (!httpResult.IsOK)
             {
                 return images;
