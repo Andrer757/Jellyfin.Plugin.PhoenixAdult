@@ -41,15 +41,15 @@ namespace PhoenixAdult.Sites
             {
                 foreach (var node in searchNodes)
                 {
-                    var titleNode = node.SelectSingleNode("./div[@class='item-thumb']/a");
-                    string titleNoFormatting = titleNode?.GetAttributeValue("title", string.Empty);
+                    var titleNode = node.SelectSingleNode(".//h4[@class='link_bright']/a");
+                    string titleNoFormatting = titleNode?.InnerText.Trim();
                     string sceneUrl = titleNode?.GetAttributeValue("href", string.Empty);
                     if (sceneUrl?.StartsWith(JoinStr) == false)
                     {
                         string curId = Helper.Encode(sceneUrl);
                         string releaseDate = string.Empty;
-                        var dateNode = node.SelectSingleNode("./div[@class='timeDate']");
-                        if (dateNode != null && DateTime.TryParse(dateNode.InnerText.Split('|')[1].Trim(), out var parsedDate))
+                        var dateNode = node.SelectSingleNode(".//li[contains(@class, 'text_med')]");
+                        if (dateNode != null && DateTime.TryParse(dateNode.InnerText.Trim(), out var parsedDate))
                         {
                             releaseDate = parsedDate.ToString("yyyy-MM-dd");
                         }
@@ -59,6 +59,7 @@ namespace PhoenixAdult.Sites
                             ProviderIds = { { Plugin.Instance.Name, $"{curId}|{Helper.Encode(titleNoFormatting)}|{releaseDate}" } },
                             Name = $"{titleNoFormatting} {releaseDate} [{Helper.GetSearchSiteName(siteNum)}]",
                             SearchProviderName = Plugin.Instance.Name,
+                            ImageUrl = node.SelectSingleNode(".//img")?.GetAttributeValue("src0_1x", string.Empty)
                         });
                     }
                 }
