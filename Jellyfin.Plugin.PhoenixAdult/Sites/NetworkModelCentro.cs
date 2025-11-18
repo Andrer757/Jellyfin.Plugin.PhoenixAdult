@@ -42,7 +42,7 @@ namespace PhoenixAdult.Sites
             var httpResult = await HTTP.Request(url, HttpMethod.Get, cancellationToken);
             if (httpResult.IsOK)
             {
-                var ahMatch = Regex.Match(httpResult.Content, "\"ah\".?:.?\"([0-9a-zA-Z\\(\\)\\[\\]\\@\\:\\,\\/\\!\\+\\-\\.\\$\\_\\[\\]=\\\\'']*)\"");
+                var ahMatch = Regex.Match(httpResult.Content, "\"ah\".?:.?\"([0-9a-zA-Z\\(\\)\\[\\]\\@\\:\\,\\/\\!\\+\\-\\.\\$_\\[\\]=\\\\'']*)\"");
                 var aetMatch = Regex.Match(httpResult.Content, "\"aet\".?:([0-9]*)");
                 if (ahMatch.Success && aetMatch.Success)
                 {
