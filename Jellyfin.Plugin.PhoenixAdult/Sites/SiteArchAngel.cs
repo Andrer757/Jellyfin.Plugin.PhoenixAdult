@@ -27,28 +27,73 @@ namespace PhoenixAdult.Sites
         public async Task<List<RemoteSearchResult>> Search(int[] siteNum, string searchTitle, DateTime? searchDate, CancellationToken cancellationToken)
         {
             var result = new List<RemoteSearchResult>();
-            string searchUrl = Helper.GetSearchSearchURL(siteNum) + Uri.EscapeDataString(searchTitle).Replace("%20", "+");
-            var httpResult = await HTTP.Request(searchUrl, HttpMethod.Get, cancellationToken);
-            if (!httpResult.IsOK)
-            {
-                return result;
-            }
+            string baseUrl = Helper.GetSearchBaseURL(siteNum);
+            string initialSearchUrl = Helper.GetSearchSearchURL(siteNum) + Uri.EscapeDataString(searchTitle).Replace("%20", "+");
 
-            var searchPageElements = HTML.ElementFromString(httpResult.Content);
-            var searchNodes = searchPageElements.SelectNodes("//div[contains(@class, 'item-video')]");
-            if (searchNodes != null)
+            var pagesToScrape = new HashSet<string> { initialSearchUrl };
+            var pagesScraped = new HashSet<string>();
+
+            while (pagesToScrape.Any())
             {
-                foreach (var node in searchNodes)
+                string currentUrl = pagesToScrape.First();
+                pagesToScrape.Remove(currentUrl);
+
+                if (pagesScraped.Contains(currentUrl))
                 {
-                    var titleNode = node.SelectSingleNode("./div[@class='item-thumb']/a");
-                    string titleNoFormatting = titleNode?.GetAttributeValue("title", string.Empty);
-                    string curId = Helper.Encode(titleNode?.GetAttributeValue("href", string.Empty));
-                    result.Add(new RemoteSearchResult
+                    continue;
+                }
+
+                var httpResult = await HTTP.Request(currentUrl, HttpMethod.Get, cancellationToken: cancellationToken);
+                if (!httpResult.IsOK)
+                {
+                    continue;
+                }
+                pagesScraped.Add(currentUrl);
+
+                var searchPageElements = HTML.ElementFromString(httpResult.Content);
+
+                var searchNodes = searchPageElements.SelectNodes("//div[contains(@class, 'latest-updates')]//div[contains(@class, 'flex-col')]");
+                if (searchNodes != null)
+                {
+                    foreach (var node in searchNodes)
                     {
-                        ProviderIds = { { Plugin.Instance.Name, curId } },
-                        Name = $"{titleNoFormatting} [ArchAngel]",
-                        SearchProviderName = Plugin.Instance.Name,
-                    });
+                        var linkNode = node.SelectSingleNode(".//div[contains(@class, 'thumbnail')]/a");
+                        var titleNode = node.SelectSingleNode(".//div[contains(@class, 'title')]//a");
+                        var imageNode = node.SelectSingleNode(".//div[contains(@class, 'thumbnail')]//img");
+
+                        if (linkNode == null || titleNode == null)
+                        {
+                            continue;
+                        }
+
+                        string sceneUrl = linkNode.GetAttributeValue("href", string.Empty);
+                        string title = titleNode.InnerText.Trim();
+                        string imageUrl = imageNode?.GetAttributeValue("data-src", string.Empty);
+
+                        if (!string.IsNullOrEmpty(sceneUrl) && !string.IsNullOrEmpty(title))
+                        {
+                            result.Add(new RemoteSearchResult
+                            {
+                                ProviderIds = { { Plugin.Instance.Name, Helper.Encode(sceneUrl) } },
+                                Name = $"{title} [{Helper.GetSearchSiteName(siteNum)}]",
+                                SearchProviderName = Plugin.Instance.Name,
+                                ImageUrl = imageUrl
+                            });
+                        }
+                    }
+                }
+
+                var paginationNodes = searchPageElements.SelectNodes("//div[@class='pagination']//a");
+                if (paginationNodes != null)
+                {
+                    foreach (var pageNode in paginationNodes)
+                    {
+                        string pageUrl = pageNode.GetAttributeValue("href", string.Empty);
+                        if (!string.IsNullOrEmpty(pageUrl) && !pagesScraped.Contains(pageUrl) && !pageUrl.StartsWith("http"))
+                        {
+                            pagesToScrape.Add(baseUrl + pageUrl);
+                        }
+                    }
                 }
             }
 
