@@ -36,7 +36,7 @@ namespace PhoenixAdult.ScheduledTasks
             await Task.Yield();
             progress?.Report(0);
 
-            var items = this.libraryManager.GetItemList(new InternalItemsQuery()).Where(o => o.ProviderIds.ContainsKey(Plugin.Instance.Name)).ToList();
+            var items = this.libraryManager.GetItemList(new InternalItemsQuery() { IncludeItemTypes = new[] { BaseItemKind.Movie } }).Where(o => o.ProviderIds.ContainsKey(Plugin.Instance.Name)).ToList();
 
             foreach (var (idx, item) in items.WithIndex())
             {
