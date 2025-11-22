@@ -43,19 +43,27 @@ namespace PhoenixAdult.Sites
                 return result;
             }
 
-            var searchResults = JObject.Parse(httpResult.Content)["html"].ToString();
-            if (searchResults == null)
+            var json = JObject.Parse(httpResult.Content);
+            var html = json["html"]?.ToString();
+
+            if (string.IsNullOrEmpty(html))
             {
                 return result;
             }
 
             var doc = new HtmlDocument();
-            doc.LoadHtml(searchResults);
+            doc.LoadHtml(html);
 
-            foreach (var searchResult in doc.DocumentNode.SelectNodes("//div[contains(@class, 'ep-item')]"))
+            var nodes = doc.DocumentNode.SelectNodes("//div[contains(@class, 'epwrap')]");
+            if (nodes == null)
             {
-                var titleNode = searchResult.SelectSingleNode(".//h3[@class='ep-title']");
-                var sceneUrlNode = searchResult.SelectSingleNode(".//a");
+                return result;
+            }
+
+            foreach (var node in nodes)
+            {
+                var titleNode = node.SelectSingleNode(".//h3[contains(@class, 'ep-title')]");
+                var sceneUrlNode = node.SelectSingleNode(".//a");
 
                 if (titleNode != null && sceneUrlNode != null)
                 {
