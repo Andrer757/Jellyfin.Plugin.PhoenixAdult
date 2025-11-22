@@ -64,11 +64,13 @@ namespace PhoenixAdult.Sites
             {
                 var titleNode = node.SelectSingleNode(".//h3[contains(@class, 'ep-title')]");
                 var sceneUrlNode = node.SelectSingleNode(".//a");
+                var imageNode = node.SelectSingleNode(".//img[contains(@class, 'stack')]");
 
                 if (titleNode != null && sceneUrlNode != null)
                 {
                     string titleNoFormatting = titleNode.InnerText.Trim();
                     string sceneUrl = sceneUrlNode.GetAttributeValue("href", string.Empty);
+                    string imageUrl = imageNode?.GetAttributeValue("src", string.Empty);
                     string curId = Helper.Encode(sceneUrl);
                     string releaseDateStr = searchDate?.ToString("yyyy-MM-dd") ?? string.Empty;
 
@@ -77,6 +79,7 @@ namespace PhoenixAdult.Sites
                         ProviderIds = { { Plugin.Instance.Name, $"{curId}|{releaseDateStr}" } },
                         Name = $"{titleNoFormatting} [{Helper.GetSearchSiteName(siteNum)}]",
                         SearchProviderName = Plugin.Instance.Name,
+                        ImageUrl = imageUrl,
                     };
                     result.Add(item);
                 }
