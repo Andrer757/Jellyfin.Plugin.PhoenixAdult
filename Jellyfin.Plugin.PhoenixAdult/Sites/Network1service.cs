@@ -234,12 +234,12 @@ namespace PhoenixAdult.Sites
             string mainSiteName = Helper.GetSearchSiteName(siteNum);
             if (!seriesNames.Contains(mainSiteName))
             {
-                movie.AddTag(mainSiteName);
+                movie.AddStudio(mainSiteName);
             }
 
             foreach (var seriesName in seriesNames)
             {
-                movie.AddTag(seriesName);
+                movie.AddStudio(seriesName);
             }
 
             DateTime dateObject = (DateTime)details["dateReleased"];
@@ -267,7 +267,7 @@ namespace PhoenixAdult.Sites
                     }
 
                     string actorPhotoUrl = actorDetails.SelectToken("images.profile.0.xs.url")?.ToString() ?? string.Empty;
-                    result.People.Add(new PersonInfo { Name = actorDetails["name"].ToString(), Type = PersonKind.Actor, ImageUrl = actorPhotoUrl });
+                    ((List<PersonInfo>)result.People).Add(new PersonInfo { Name = actorDetails["name"].ToString(), Type = PersonKind.Actor, ImageUrl = actorPhotoUrl });
                 }
             }
 

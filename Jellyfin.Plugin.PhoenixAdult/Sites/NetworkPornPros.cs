@@ -136,7 +136,7 @@ namespace PhoenixAdult.Sites
             movie.AddStudio("PornPros");
 
             string tagline = detailsPageElements["sponsor"]?["name"]?.ToString() ?? string.Empty;
-            movie.AddTag(tagline);
+            movie.AddStudio(tagline);
             movie.AddCollection(tagline);
 
             if (DateTime.TryParse(detailsPageElements["releasedAt"]?.ToString(), out var parsedDate))
@@ -192,7 +192,7 @@ namespace PhoenixAdult.Sites
 
                     foreach (var name in actorName.Split('&'))
                     {
-                        result.People.Add(new PersonInfo { Name = name.Trim(), Type = PersonKind.Actor, ImageUrl = actorPhotoURL });
+                        ((List<PersonInfo>)result.People).Add(new PersonInfo { Name = name.Trim(), Type = PersonKind.Actor, ImageUrl = actorPhotoURL });
                     }
                 }
             }
@@ -201,7 +201,7 @@ namespace PhoenixAdult.Sites
             {
                 foreach (var actor in ActorsDB[movie.Name])
                 {
-                    result.People.Add(new PersonInfo { Name = actor, Type = PersonKind.Actor });
+                    ((List<PersonInfo>)result.People).Add(new PersonInfo { Name = actor, Type = PersonKind.Actor });
                 }
             }
 
