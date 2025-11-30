@@ -27,7 +27,7 @@ namespace PhoenixAdult.Sites
     {
         private async Task<string> GetApiKey(int[] siteNum, CancellationToken cancellationToken)
         {
-            string url = $"{Helper.GetSearchBaseURL(siteNum)}/en/login";
+            string url = $"{Helper.GetSearchBaseURL(siteNum)}{((siteNum[0] == 131) ? "/login" : "/en/login")}";
             var httpResult = await HTTP.Request(url, HttpMethod.Get, cancellationToken);
             if (httpResult.IsOK)
             {
@@ -40,7 +40,15 @@ namespace PhoenixAdult.Sites
             }
 
             // Fallback if login page doesn't work
-            url = $"{Helper.GetSearchBaseURL(siteNum)}/en";
+            if (siteNum[0] == 131)
+            {
+                url = Helper.GetSearchBaseURL(siteNum);
+            }
+            else
+            {
+                url = $"{Helper.GetSearchBaseURL(siteNum)}/en";
+            }
+
             httpResult = await HTTP.Request(url, HttpMethod.Get, cancellationToken);
             if (httpResult.IsOK)
             {
@@ -84,7 +92,7 @@ namespace PhoenixAdult.Sites
                 return null;
             }
 
-            //Logger.Info($"[NetworkGammaEntOther] results: {httpResult.Content}");
+            Logger.Info($"[NetworkGammaEntOther] results: {httpResult.Content}");
             var results = JObject.Parse(httpResult.Content)["results"];
             if (results is JArray resultsArray && resultsArray.Count > 0)
             {
@@ -134,11 +142,19 @@ namespace PhoenixAdult.Sites
                             releaseDate = parsedDate.ToString("yyyy-MM-dd");
                         }
 
+                        var topImageObject = searchResult.SelectToken("pictures.nsfw.top") as JObject;
+                        string imageUrl = string.Empty;
+
+                        if (topImageObject != null && topImageObject.Properties().Any()) {
+                            imageUrl = $"https://images-fame.gammacdn.com/movies/{topImageObject.Properties().First().Value.ToString()}";
+                        }
+
                         result.Add(new RemoteSearchResult
                         {
-                            ProviderIds = { { Plugin.Instance.Name, $"{curId}|{sceneType}|{releaseDate}" } },
+                            ProviderIds = { { Plugin.Instance.Name, Helper.Encode($"{curId}|{sceneType}") } },
                             Name = $"[{sceneType.Capitalize()}] {titleNoFormatting} {releaseDate}",
                             SearchProviderName = Plugin.Instance.Name,
+                            ImageUrl = imageUrl,
                         });
                     }
                 }
@@ -155,10 +171,9 @@ namespace PhoenixAdult.Sites
                 People = new List<PersonInfo>(),
             };
 
-            string[] providerIds = sceneID[0].Split('|');
+            string[] providerIds = Helper.Decode(sceneID[0]).Split('|');
             string sceneId = providerIds[0];
             string sceneType = providerIds[1];
-            string sceneDate = providerIds[2];
             string apiKey = await GetApiKey(siteNum, cancellationToken);
             if (apiKey == null)
             {
@@ -178,17 +193,31 @@ namespace PhoenixAdult.Sites
 
             var movie = (Movie)result.Item;
             movie.Name = Helper.ParseTitle(detailsPageElements["title"].ToString(), siteNum);
+            movie.SortName = Helper.ParseTitle(detailsPageElements["title"].ToString(), siteNum);
+            movie.OriginalTitle = Helper.ParseTitle(detailsPageElements["title"].ToString(), siteNum);
             movie.Overview = detailsPageElements["description"].ToString().Replace("</br>", "\n").Replace("<br>", "\n");
-            var studio = new[]
-            {
-                detailsPageElements["network_name"]?.ToString(),
-                detailsPageElements["studio_name"]?.ToString(),
-                Helper.GetSearchSiteName(siteNum),
-            }.FirstOrDefault(s => !string.IsNullOrEmpty(s));
-            Logger.Info($"[NetworkGammaEntOther] studio: {studio}");
-            movie.AddStudio(studio);
 
-            if (DateTime.TryParse(sceneDate, out var parsedDate))
+            var network = string.Empty;
+            if (!string.IsNullOrEmpty(detailsPageElements["network_name"]?.ToString()))
+            {
+                network = detailsPageElements["network_name"]?.ToString();
+                movie.AddStudio(network);
+            }
+
+            var studio = string.Empty;
+            if (!string.IsNullOrEmpty(detailsPageElements["studio_name"]?.ToString()) && !network.Equals(detailsPageElements["studio_name"]?.ToString()))
+            {
+                studio = detailsPageElements["studio_name"]?.ToString();
+                movie.AddStudio(studio);
+            }
+
+            var std = Helper.GetSearchSiteName(siteNum);
+            if (!std.Equals(network) && !std.Equals(studio))
+            {
+                movie.AddStudio(std);
+            }
+
+            if (DateTime.TryParse(detailsPageElements[sceneType == "scenes" ? "release_date" : "date_created"].ToString(), out var parsedDate))
             {
                 movie.PremiereDate = parsedDate;
                 movie.ProductionYear = parsedDate.Year;
@@ -214,7 +243,7 @@ namespace PhoenixAdult.Sites
                     }
                 }
 
-                result.People.Add(new PersonInfo { Name = actorName, Type = PersonKind.Actor, ImageUrl = actorPhotoUrl });
+                ((List<PersonInfo>)result.People).Add(new PersonInfo { Name = actorName, Type = PersonKind.Actor, ImageUrl = actorPhotoUrl });
             }
 
             return result;

@@ -140,7 +140,7 @@ namespace PhoenixAdult.Sites
             movie.AddStudio("Full Porn Network");
 
             string tagline = Helper.GetSearchSiteName(siteNum);
-            movie.AddTag(tagline);
+            movie.AddStudio(tagline);
 
             var dateNode = detailsPageElements.SelectSingleNode("//div[@class='video-info']//p");
             if (dateNode != null && DateTime.TryParse(dateNode.InnerText.Trim(), out var parsedDate))
@@ -175,7 +175,7 @@ namespace PhoenixAdult.Sites
                     {
                         var actorPage = HTML.ElementFromString(actorHttp.Content);
                         string actorPhotoUrl = actorPage.SelectSingleNode("//img[@alt='model']")?.GetAttributeValue("src0_3x", string.Empty);
-                        result.People.Add(new PersonInfo { Name = actorName, Type = PersonKind.Actor, ImageUrl = actorPhotoUrl });
+                        ((List<PersonInfo>)result.People).Add(new PersonInfo { Name = actorName, Type = PersonKind.Actor, ImageUrl = actorPhotoUrl });
                     }
                 }
             }
