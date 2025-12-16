@@ -28,11 +28,27 @@ namespace PhoenixAdult.Sites
             var http = await HTTP.Request(url, cancellationToken);
             if (http.IsOK)
             {
-                var ldJsonNode = HTML.ElementFromString(http.Content).SelectSingleNode("//script[@type='application/ld+json']");
+                var html = HTML.ElementFromString(http.Content);
+                var ldJsonNode = html.SelectSingleNode("//script[@type='application/ld+json']");
                 if (ldJsonNode != null)
                 {
-                    return JObject.Parse(ldJsonNode.InnerText);
+                    try
+                    {
+                        return JObject.Parse(ldJsonNode.InnerText);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Error($"[ManyVids] Failed to parse JSON-LD from {url}: {ex.Message}");
+                    }
                 }
+                else
+                {
+                    Logger.Warn($"[ManyVids] JSON-LD script tag not found on page: {url}");
+                }
+            }
+            else
+            {
+                Logger.Error($"[ManyVids] Failed to fetch page: {url}. Status: {http.StatusCode}");
             }
 
             return null;
@@ -41,11 +57,28 @@ namespace PhoenixAdult.Sites
         private async Task<JObject> GetDataFromAPI(string url, CancellationToken cancellationToken)
         {
             var http = await HTTP.Request(url, cancellationToken);
-            return http.IsOK ? (JObject)JObject.Parse(http.Content)["data"] : null;
+            if (http.IsOK)
+            {
+                try
+                {
+                    return (JObject)JObject.Parse(http.Content)["data"];
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error($"[ManyVids] Failed to parse API response from {url}: {ex.Message}");
+                }
+            }
+            else
+            {
+                Logger.Error($"[ManyVids] API Request failed: {url}. Status: {http.StatusCode}");
+            }
+
+            return null;
         }
 
         public async Task<List<RemoteSearchResult>> Search(int[] siteNum, string searchTitle, DateTime? searchDate, CancellationToken cancellationToken)
         {
+            Logger.Info($"[ManyVids] Searching for: '{searchTitle}'");
             var result = new List<RemoteSearchResult>();
             if (siteNum == null || string.IsNullOrEmpty(searchTitle))
             {
@@ -55,6 +88,7 @@ namespace PhoenixAdult.Sites
             string sceneID = searchTitle.Split(' ')[0];
             if (!int.TryParse(sceneID, out _))
             {
+                Logger.Warn($"[ManyVids] Search title '{searchTitle}' does not start with a numeric ID. ManyVids search requires the ID.");
                 return result;
             }
 
@@ -62,12 +96,15 @@ namespace PhoenixAdult.Sites
             var searchResult = await GetJSONfromPage(sceneUrl, cancellationToken);
             if (searchResult == null)
             {
+                Logger.Warn($"[ManyVids] No data found for URL: {sceneUrl}");
                 return result;
             }
 
             string titleNoFormatting = (string)searchResult["name"];
             string curID = Helper.Encode(sceneUrl);
-            string searchID = sceneUrl.Split('/').Last().Split('-')[0];
+            // searchID variable was unused in original code, removing it or keeping it if needed? Original: string searchID = sceneUrl.Split('/').Last().Split('-')[0];
+            // It was unused.
+
             string subSite = searchResult.SelectToken("creator.name")?.ToString();
             string releaseDate = string.Empty;
             if (DateTime.TryParse((string)searchResult["uploadDate"], out var parsedDate))
@@ -97,10 +134,13 @@ namespace PhoenixAdult.Sites
             string sceneURL = Helper.Decode(providerIds[0]);
             string sceneDate = providerIds.Length > 1 ? providerIds[1] : null;
 
+            Logger.Info($"[ManyVids] Updating metadata for URL: {sceneURL}");
+
             string videoID = sceneURL.Split('/').Last().Split('-')[0];
             var videoPageElements = await GetDataFromAPI($"https://www.manyvids.com/bff/store/video/{videoID}", cancellationToken);
             if (videoPageElements == null)
             {
+                Logger.Error($"[ManyVids] Failed to get API data for video ID: {videoID}");
                 return result;
             }
 
@@ -125,12 +165,15 @@ namespace PhoenixAdult.Sites
             }
 
             var actor = videoPageElements["model"];
-            ((List<PersonInfo>)result.People).Add(new PersonInfo
+            if (actor != null)
             {
-                Name = (string)actor["displayName"],
-                ImageUrl = (string)actor["avatar"],
-                Type = PersonKind.Actor,
-            });
+                ((List<PersonInfo>)result.People).Add(new PersonInfo
+                {
+                    Name = (string)actor["displayName"],
+                    ImageUrl = (string)actor["avatar"],
+                    Type = PersonKind.Actor,
+                });
+            }
 
             return result;
         }

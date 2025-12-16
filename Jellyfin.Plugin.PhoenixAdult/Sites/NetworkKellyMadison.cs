@@ -67,6 +67,8 @@ namespace PhoenixAdult.Sites
                     releaseDate = parsedDate.ToString("yyyy-MM-dd");
                 }
 
+                string imgUrl = node.SelectSingleNode(".//img[contains(@class, 'video-thumbnail')]")?.GetAttributeValue("src", string.Empty);
+
                 string displayDate = !string.IsNullOrEmpty(releaseDate) ? releaseDate : string.Empty;
                 string curId = Helper.Encode($"{sceneUrl}|{releaseDate}");
 
@@ -75,6 +77,7 @@ namespace PhoenixAdult.Sites
                     ProviderIds = { { Plugin.Instance.Name, curId } },
                     Name = $"{titleNoFormatting} [{subsite}] {displayDate}",
                     SearchProviderName = Plugin.Instance.Name,
+                    ImageUrl = imgUrl,
                 });
             }
 
