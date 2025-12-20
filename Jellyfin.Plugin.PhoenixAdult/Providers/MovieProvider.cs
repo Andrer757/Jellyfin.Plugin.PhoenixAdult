@@ -45,31 +45,35 @@ namespace PhoenixAdult.Providers
             var title = string.Empty;
             (int[] siteNum, string siteName) site = (null, null);
 
-#if __EMBY__
-#else
-            if (!string.IsNullOrEmpty(searchInfo.Path) && Plugin.Instance.Configuration.UseFilePath)
-            {
-                Logger.Info($"searchInfo.Path: {searchInfo.Path}");
-                var path = Path.Combine(Path.GetDirectoryName(searchInfo.Path), Path.GetFileNameWithoutExtension(searchInfo.Path));
-                foreach (var name in path.Split(Path.DirectorySeparatorChar).Reverse())
-                {
-                    title = $"{name} {title}";
-                    Logger.Info($"MP name: {name}");
-                    site = Helper.GetSiteFromTitle(name);
-                    if (site.siteNum != null)
-                    {
-                        break;
-                    }
-                }
-            }
-#endif
+            // 1. Try to detect from searchInfo.Name directly
+            Logger.Info($"MP name: {searchInfo.Name}");
+            title = Helper.ReplaceAbbrieviation(searchInfo.Name);
+            Logger.Info($"MP title: {title}");
+            site = Helper.GetSiteFromTitle(title);
 
+            // 2. If not found, Try to detect from Path (if enabled)
             if (site.siteNum == null)
             {
-                Logger.Info($"MP name: {searchInfo.Name}");
-                title = Helper.ReplaceAbbrieviation(searchInfo.Name);
-                Logger.Info($"MP title: {title}");
-                site = Helper.GetSiteFromTitle(title);
+#if __EMBY__
+#else
+                if (!string.IsNullOrEmpty(searchInfo.Path) && Plugin.Instance.Configuration.UseFilePath)
+                {
+                    Logger.Info($"searchInfo.Path: {searchInfo.Path}");
+                    var path = Path.Combine(Path.GetDirectoryName(searchInfo.Path), Path.GetFileNameWithoutExtension(searchInfo.Path));
+                    var pathTitle = string.Empty;
+                    foreach (var name in path.Split(Path.DirectorySeparatorChar).Reverse())
+                    {
+                        pathTitle = $"{name} {pathTitle}";
+                        Logger.Info($"MP name: {name}");
+                        site = Helper.GetSiteFromTitle(name);
+                        if (site.siteNum != null)
+                        {
+                            title = pathTitle; // Use path-based title if site found in path
+                            break;
+                        }
+                    }
+                }
+#endif
             }
 
             if (site.siteNum == null)
