@@ -68,6 +68,7 @@ namespace PhoenixAdult.Sites
 
         public async Task<MetadataResult<BaseItem>> Update(int[] siteNum, string[] sceneID, CancellationToken cancellationToken)
         {
+            Logger.Info($"ActorThePornDB Update: Start with sceneID={string.Join(",", sceneID)}");
             var result = new MetadataResult<BaseItem>()
             {
                 Item = new Person(),
@@ -76,6 +77,7 @@ namespace PhoenixAdult.Sites
 
             var id = sceneID[0];
             var url = $"{Helper.GetSearchSearchURL(siteNum)}/performers/{id}";
+            Logger.Info($"ActorThePornDB Update: URL={url}");
 
             var headers = new Dictionary<string, string>();
             if (!string.IsNullOrEmpty(Plugin.Instance.Configuration.MetadataAPIToken))
@@ -87,6 +89,7 @@ namespace PhoenixAdult.Sites
             var http = await HTTP.Request(url, cancellationToken, headers).ConfigureAwait(false);
             if (!http.IsOK)
             {
+                Logger.Error($"ActorThePornDB Update: HTTP Error {http.StatusCode}");
                 return result;
             }
 
@@ -94,6 +97,7 @@ namespace PhoenixAdult.Sites
             var details = json["data"];
             if (details == null || details.Type == JTokenType.Null)
             {
+                Logger.Error("ActorThePornDB Update: 'data' is null");
                 return result;
             }
 
@@ -101,6 +105,8 @@ namespace PhoenixAdult.Sites
             result.Item.SetProviderId(Plugin.Instance.Name, id);
             result.Item.Name = (string)details["name"];
             result.Item.Overview = (string)details["bio"];
+
+            Logger.Info($"ActorThePornDB Update: Name={result.Item.Name}");
 
             var extras = details["extras"];
             if (extras != null && extras.Type != JTokenType.Null)
@@ -116,7 +122,6 @@ namespace PhoenixAdult.Sites
                     result.Item.ProductionLocations = new string[] { birthPlace };
                 }
             }
-            // Fallback to root if not in extras (though API sample suggests extras)
             else
             {
                 if (DateTime.TryParseExact((string)details["born_on"], "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var bornDate))
@@ -140,6 +145,8 @@ namespace PhoenixAdult.Sites
                     result.Item.OriginalTitle = string.Join(", ", aliasList);
                 }
             }
+
+            Logger.Info($"ActorThePornDB Update: Finished. HasMetadata={result.HasMetadata}, Name={result.Item.Name}, PremiereDate={result.Item.PremiereDate}");
 
             return result;
         }
