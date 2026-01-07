@@ -55,11 +55,22 @@ namespace PhoenixAdult.Sites
                     string sceneURL = searchResult.SelectSingleNode(".//a")?.GetAttributeValue("href", string.Empty).Split('?')[0];
                     string releaseDate = DateTime.Parse(searchResult.SelectSingleNode(".//span[@class='scene-date']")?.InnerText.Trim()).ToString("yyyy-MM-dd");
 
+                    string imgUrl = searchResult.SelectSingleNode(".//img[contains(@class, 'scene-thumb')]")?.GetAttributeValue("data-src", string.Empty);
+                    if (string.IsNullOrEmpty(imgUrl))
+                    {
+                        imgUrl = searchResult.SelectSingleNode(".//img[contains(@class, 'scene-thumb')]")?.GetAttributeValue("src", string.Empty);
+                    }
+                    if (!string.IsNullOrEmpty(imgUrl) && !imgUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                    {
+                        imgUrl = "https:" + imgUrl;
+                    }
+
                     result.Add(new RemoteSearchResult
                     {
                         ProviderIds = { { Plugin.Instance.Name, Helper.Encode($"{sceneURL}|{releaseDate}") } },
                         Name = $"{titleNoFormatting} [Tonight's Girlfriend] {releaseDate}",
                         SearchProviderName = Plugin.Instance.Name,
+                        ImageUrl = imgUrl,
                     });
                 }
 
