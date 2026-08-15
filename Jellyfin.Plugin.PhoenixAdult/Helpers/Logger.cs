@@ -4,7 +4,7 @@ namespace PhoenixAdult.Helpers
 {
     internal static class Logger
     {
-        private static ILogger Log { get; } = Plugin.Log;
+        private static ILogger Log => Plugin.Log;
 
         public static void Info(string text)
         {
