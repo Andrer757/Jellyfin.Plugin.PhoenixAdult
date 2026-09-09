@@ -23,11 +23,10 @@ class Program
             Console.WriteLine($"Version: {assembly.GetName().Version}");
             Console.WriteLine($"Full Name: {assembly.FullName}");
             Console.WriteLine($"Location: {assembly.Location}");
-            Console.WriteLine($"Code Base: {assembly.CodeBase}");
-
             var assemblyName = assembly.GetName();
-            Console.WriteLine($"Culture: {assemblyName.CultureInfo.DisplayName}");
-            Console.WriteLine($"Public Key Token: {BitConverter.ToString(assemblyName.GetPublicKeyToken()).Replace("-", "").ToLowerInvariant()}");
+            Console.WriteLine($"Culture: {assemblyName.CultureInfo?.DisplayName ?? "Invariant"}");
+            var token = assemblyName.GetPublicKeyToken();
+            Console.WriteLine($"Public Key Token: {(token != null ? BitConverter.ToString(token).Replace("-", "").ToLowerInvariant() : "null")}");
 
             Console.WriteLine("\nReferenced Assemblies:");
             foreach (var referencedAssembly in assembly.GetReferencedAssemblies())
