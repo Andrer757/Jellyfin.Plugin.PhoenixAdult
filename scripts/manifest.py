@@ -17,7 +17,7 @@ def generate(filename, version):
         'changelog': 'Auto Released by Actions',
         'targetAbi': '12.0.0.0',
         'sourceUrl': 'https://github.com/Andrer757/Jellyfin.Plugin.PhoenixAdult/releases/download/'
-                     f'v{version}/Jellyfin.plugin.PhoenixAdult@v{version}.zip',
+                     f'v{version}/Jellyfin.Plugin.PhoenixAdult@v{version}.zip',
         'timestamp': datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ'),
         'version': version
     }

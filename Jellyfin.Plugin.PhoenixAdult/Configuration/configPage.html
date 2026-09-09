@@ -81,8 +81,8 @@
                         </label>
                     </div>
                     <div class="inputContainer">
-                        <label class="inputLabel inputLabelUnfocused" for="TagActorsValue">Actor Tag</label>
-                        <input id="TagActorsValue" name="TagActorsValue" type="text" is="emby-input" />
+                        <label class="inputLabel inputLabelUnfocused" for="TagActorValue">Actor Tag</label>
+                        <input id="TagActorValue" name="TagActorValue" type="text" is="emby-input" />
                     </div>
                     <div class="checkboxContainer checkboxContainer-withDescripton">
                         <label class="emby-checkbox-label">
@@ -166,6 +166,8 @@
                     $('#UseMetadataAPI').prop('checked', config.UseMetadataAPI);
                     $('#MetadataAPIToken').val(config.MetadataAPIToken).change();
                     $('#DisableActors').prop('checked', config.DisableActors);
+                    $('#TagActors').prop('checked', config.TagActors);
+                    $('#TagActorValue').val(config.TagActorValue).change();
                     $('#DisableGenres').prop('checked', config.DisableGenres);
                     $('#DisableImageValidation').prop('checked', config.DisableImageValidation);
                     $('#DisableImageSize').prop('checked', config.DisableImageSize);
@@ -194,6 +196,8 @@
                     config.MetadataAPIToken = $('#MetadataAPIToken').val();
                     config.UseMetadataAPI = $('#UseMetadataAPI').prop('checked');
                     config.DisableActors = $('#DisableActors').prop('checked');
+                    config.TagActors = $('#TagActors').prop('checked');
+                    config.TagActorValue = $('#TagActorValue').val();
                     config.DisableGenres = $('#DisableGenres').prop('checked');
                     config.DisableImageValidation = $('#DisableImageValidation').prop('checked');
                     config.DisableImageSize = $('#DisableImageSize').prop('checked');
