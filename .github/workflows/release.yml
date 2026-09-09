@@ -51,7 +51,7 @@ jobs:
           git commit -m "Auto Updated by Actions"
           git push origin master
 
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ steps.shell.outputs.version }}
           prerelease: false
