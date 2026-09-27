@@ -51,11 +51,14 @@ namespace PhoenixAdult.Sites
                 if (httpResult.IsOK)
                 {
                     var detailsPageElements = HTML.ElementFromString(httpResult.Content);
-                    string titleNoFormatting = Helper.ParseTitle(detailsPageElements.SelectSingleNode("//h1[contains(@class, 'title_bar')]")?.InnerText.Split(':').Last().Trim(), siteNum);
+                    var titleNode = detailsPageElements.SelectSingleNode("//h1[contains(@class, 'title_bar')] | //h1[contains(@class, 'trailer_title')] | //meta[@property='og:title']");
+                    string rawTitle = titleNode?.Name == "meta" ? titleNode.GetAttributeValue("content", string.Empty) : titleNode?.InnerText;
+                    string titleNoFormatting = Helper.ParseTitle(rawTitle?.Trim(), siteNum);
                     string curId = Helper.Encode(sceneUrl);
                     string releaseDate = string.Empty;
-                    var dateNode = detailsPageElements.SelectSingleNode("//div[@class='video-info']//p");
-                    if (dateNode != null && DateTime.TryParse(dateNode.InnerText.Trim(), out var parsedDate))
+                    var dateNode = detailsPageElements.SelectSingleNode("//label[contains(., 'Date Added')]/parent::* | //div[@class='video-info']//p");
+                    string dateText = dateNode?.InnerText.Replace("Date Added:", string.Empty).Trim();
+                    if (!string.IsNullOrEmpty(dateText) && DateTime.TryParse(dateText, out var parsedDate))
                     {
                         releaseDate = parsedDate.ToString("yyyy-MM-dd");
                     }
@@ -65,11 +68,11 @@ namespace PhoenixAdult.Sites
                     }
 
                     var imageUrl = string.Empty;
-                    var posterNode = detailsPageElements.SelectSingleNode("//video");
+                    var posterNode = detailsPageElements.SelectSingleNode("//meta[@property='og:image'] | //video");
                     if (posterNode != null)
                     {
-                        imageUrl = posterNode.GetAttributeValue("poster", string.Empty);
-                        if (!imageUrl.StartsWith("http"))
+                        imageUrl = posterNode.Name == "meta" ? posterNode.GetAttributeValue("content", string.Empty) : posterNode.GetAttributeValue("poster", string.Empty);
+                        if (!string.IsNullOrEmpty(imageUrl) && !imageUrl.StartsWith("http"))
                         {
                             imageUrl = Helper.GetSearchBaseURL(siteNum) + imageUrl;
                         }
@@ -91,15 +94,22 @@ namespace PhoenixAdult.Sites
                 if (httpResult.IsOK)
                 {
                     var modelPageElements = HTML.ElementFromString(httpResult.Content);
-                    var sceneNodes = modelPageElements.SelectNodes("//div[contains(@class, 'latest-updates')]//div[@data-setid]");
+                    var sceneNodes = modelPageElements.SelectNodes("//a[contains(@class, 'swimlane-scene-thumbnail-title-link')] | //div[contains(@class, 'latest-updates')]//div[@data-setid]");
                     if (sceneNodes != null)
                     {
                         foreach (var sceneNode in sceneNodes)
                         {
-                            string sceneLink = sceneNode.SelectSingleNode(".//a[@class='updateimg']")?.GetAttributeValue("href", string.Empty);
-                            if (!searchResultsUrls.Contains(sceneLink))
+                            string sceneLink = sceneNode.GetAttributeValue("href", string.Empty);
+                            string sceneTitle = sceneNode.InnerText.Trim();
+                            if (string.IsNullOrEmpty(sceneLink))
                             {
-                                string titleNoFormatting = sceneNode.InnerText.Split(':').Last().Trim();
+                                sceneLink = sceneNode.SelectSingleNode(".//a[@class='updateimg']")?.GetAttributeValue("href", string.Empty);
+                                sceneTitle = sceneNode.InnerText.Split(':').Last().Trim();
+                            }
+
+                            if (!string.IsNullOrEmpty(sceneLink) && !searchResultsUrls.Contains(sceneLink))
+                            {
+                                string titleNoFormatting = Helper.ParseTitle(sceneTitle, siteNum);
                                 string curId = Helper.Encode(sceneLink);
                                 string releaseDate = searchDate?.ToString("yyyy-MM-dd") ?? string.Empty;
                                 result.Add(new RemoteSearchResult
@@ -144,15 +154,23 @@ namespace PhoenixAdult.Sites
 
             var movie = (Movie)result.Item;
             movie.ExternalId = sceneUrl;
-            movie.Name = Helper.ParseTitle(detailsPageElements.SelectSingleNode("//h1[contains(@class, 'title_bar')]")?.InnerText.Split(':').Last().Trim(), siteNum);
-            movie.Overview = detailsPageElements.SelectSingleNode("//div[contains(@class, 'video-description')]/p[@class='description-text']")?.InnerText.Trim();
+
+            var titleNode = detailsPageElements.SelectSingleNode("//h1[contains(@class, 'title_bar')] | //h1[contains(@class, 'trailer_title')] | //meta[@property='og:title']");
+            string rawTitle = titleNode?.Name == "meta" ? titleNode.GetAttributeValue("content", string.Empty) : titleNode?.InnerText;
+            movie.Name = Helper.ParseTitle(rawTitle?.Trim(), siteNum);
+
+            var overviewNode = detailsPageElements.SelectSingleNode("//p[@id='description'] | //div[contains(@class, 'video-description')]/p[@class='description-text'] | //meta[@name='description']");
+            string rawOverview = overviewNode?.Name == "meta" ? overviewNode.GetAttributeValue("content", string.Empty) : overviewNode?.InnerText;
+            movie.Overview = rawOverview?.Trim();
+
             movie.AddStudio("Full Porn Network");
 
             string tagline = Helper.GetSearchSiteName(siteNum);
             movie.AddStudio(tagline);
 
-            var dateNode = detailsPageElements.SelectSingleNode("//div[@class='video-info']//p");
-            if (dateNode != null && DateTime.TryParse(dateNode.InnerText.Trim(), out var parsedDate))
+            var dateNode = detailsPageElements.SelectSingleNode("//label[contains(., 'Date Added')]/parent::* | //div[@class='video-info']//p");
+            string dateText = dateNode?.InnerText.Replace("Date Added:", string.Empty).Trim();
+            if (!string.IsNullOrEmpty(dateText) && DateTime.TryParse(dateText, out var parsedDate))
             {
                 movie.PremiereDate = parsedDate;
                 movie.ProductionYear = parsedDate.Year;
@@ -163,29 +181,69 @@ namespace PhoenixAdult.Sites
                 movie.ProductionYear = parsedDate.Year;
             }
 
-            var genreNodes = detailsPageElements.SelectNodes("//div[contains(@class, 'video-info')]//a[contains(@href, '/categories/')]");
+            var genreNodes = detailsPageElements.SelectNodes("//div[@id='preview']//a[contains(@href, '/porn-categories/') or contains(@href, '/categories/')] | //div[contains(@class, 'video-info')]//a[contains(@href, '/categories/')] | //div[contains(@class, 'video-content')]//a[contains(@href, '/porn-categories/') or contains(@href, '/categories/')]");
             if (genreNodes != null)
             {
                 foreach (var genre in genreNodes)
                 {
-                    movie.AddGenre(genre.InnerText.Trim());
+                    string genreName = genre.InnerText.Trim();
+                    if (!string.IsNullOrEmpty(genreName) && !genreName.Equals("Categories", StringComparison.OrdinalIgnoreCase))
+                    {
+                        movie.AddGenre(genreName);
+                    }
                 }
             }
 
-            var actorNodes = detailsPageElements.SelectNodes("//div[contains(@class, 'video-info')]//a[contains(@href, '/models/')]");
+            var actorNodes = detailsPageElements.SelectNodes("//div[@id='preview']//a[contains(@href, '/models/')] | //div[contains(@class, 'video-info')]//a[contains(@href, '/models/')] | //div[contains(@class, 'video-content')]//a[contains(@href, '/models/')]");
             if (actorNodes != null)
             {
                 foreach (var actor in actorNodes)
                 {
                     string actorName = actor.InnerText.Trim();
                     string actorLink = actor.GetAttributeValue("href", string.Empty);
+                    if (string.IsNullOrEmpty(actorName) || actorName.Equals("Models", StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
+                    if (!actorLink.StartsWith("http"))
+                    {
+                        actorLink = Helper.GetSearchBaseURL(siteNum) + actorLink;
+                    }
+
                     var actorHttp = await HTTP.Request(actorLink, HttpMethod.Get, cancellationToken);
+                    string actorPhotoUrl = string.Empty;
                     if (actorHttp.IsOK)
                     {
                         var actorPage = HTML.ElementFromString(actorHttp.Content);
-                        string actorPhotoUrl = actorPage.SelectSingleNode("//img[@alt='model']")?.GetAttributeValue("src0_3x", string.Empty);
-                        ((List<PersonInfo>)result.People).Add(new PersonInfo { Name = actorName, Type = PersonKind.Actor, ImageUrl = actorPhotoUrl });
+                        var actorImgNode = actorPage.SelectSingleNode("//img[contains(@class, 'model_bio_thumb')] | //meta[@property='og:image'] | //img[@alt='model']");
+                        if (actorImgNode != null)
+                        {
+                            if (actorImgNode.Name == "meta")
+                            {
+                                actorPhotoUrl = actorImgNode.GetAttributeValue("content", string.Empty);
+                            }
+                            else
+                            {
+                                actorPhotoUrl = actorImgNode.GetAttributeValue("src", string.Empty);
+                                if (string.IsNullOrEmpty(actorPhotoUrl))
+                                {
+                                    actorPhotoUrl = actorImgNode.GetAttributeValue("data-src", string.Empty);
+                                }
+                                if (string.IsNullOrEmpty(actorPhotoUrl))
+                                {
+                                    actorPhotoUrl = actorImgNode.GetAttributeValue("src0_3x", string.Empty);
+                                }
+                            }
+                        }
+
+                        if (!string.IsNullOrEmpty(actorPhotoUrl) && !actorPhotoUrl.StartsWith("http"))
+                        {
+                            actorPhotoUrl = Helper.GetSearchBaseURL(siteNum) + actorPhotoUrl;
+                        }
                     }
+
+                    ((List<PersonInfo>)result.People).Add(new PersonInfo { Name = actorName, Type = PersonKind.Actor, ImageUrl = actorPhotoUrl });
                 }
             }
 
@@ -209,16 +267,24 @@ namespace PhoenixAdult.Sites
 
             var detailsPageElements = HTML.ElementFromString(httpResult.Content);
 
-            var posterNode = detailsPageElements.SelectSingleNode("//video");
+            var posterNode = detailsPageElements.SelectSingleNode("//meta[@property='og:image'] | //video");
             if (posterNode != null)
             {
-                string imageUrl = posterNode.GetAttributeValue("poster", string.Empty);
-                if (!imageUrl.StartsWith("http"))
+                string imageUrl = posterNode.Name == "meta" ? posterNode.GetAttributeValue("content", string.Empty) : posterNode.GetAttributeValue("poster", string.Empty);
+                if (!string.IsNullOrEmpty(imageUrl))
                 {
-                    imageUrl = Helper.GetSearchBaseURL(siteNum) + imageUrl;
-                }
+                    if (!imageUrl.StartsWith("http"))
+                    {
+                        imageUrl = Helper.GetSearchBaseURL(siteNum) + imageUrl;
+                    }
 
-                images.Add(new RemoteImageInfo { Url = imageUrl.Replace("-1x.jpg", "-3x.jpg"), Type = ImageType.Primary });
+                    if (!imageUrl.Contains("token=") && !imageUrl.Contains("expires="))
+                    {
+                        imageUrl = imageUrl.Replace("-1x.jpg", "-3x.jpg");
+                    }
+
+                    images.Add(new RemoteImageInfo { Url = imageUrl, Type = ImageType.Primary });
+                }
             }
 
             return images;
